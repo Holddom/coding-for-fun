@@ -19,8 +19,8 @@ struct TreeNode* buildTree(int* inorder, int inorderSize, int* postorder, int po
         if (inorder[i] == tmp)
             break;
     }
-    int left_size = i; int right_size = size - i - 1;
-    int* left_in = inorder; int* right_in = inorder + i + 1;
+    int left_size = i; int right_size = size - i - 1;        //size值的更新
+    int* left_in = inorder; int* right_in = inorder + i + 1;  //传递数组的指针 这点很关键
     int* left_post = postorder; int* right_post = postorder + i;
     struct TreeNode* T = (struct TreeNode*)malloc(sizeof(struct TreeNode));
     T->val = tmp;

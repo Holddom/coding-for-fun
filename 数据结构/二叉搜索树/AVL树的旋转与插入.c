@@ -71,7 +71,7 @@ AVLTree Insert(AVLTree T, ElementType X)
         /* 插入T的左子树 */
         T->Left = Insert(T->Left, X);
         /* 如果需要左旋 */
-        if (GetHeight(T->Left) - GetHeight(T->Right) == 2)
+        if (GetHeight(T->Left) - GetHeight(T->Right) == 2)    //是向左子树添加结点的，所以两者差值可能左大于右
             if (X < T->Left->Data)
                 T = SingleLeftRotation(T);      /* 左单旋 */
             else
@@ -89,7 +89,7 @@ AVLTree Insert(AVLTree T, ElementType X)
                 T = DoubleRightLeftRotation(T); /* 右-左双旋 */
     } /* else if (插入右子树) 结束 */
 
-    /* else X == T->Data，无须插入 */
+    /* else X == T->Data，无须插入 */           //这点是二叉搜索树的特点
 
     /* 别忘了更新树高 */
     T->Height = Max(GetHeight(T->Left), GetHeight(T->Right)) + 1;
