@@ -1,4 +1,4 @@
-typedef struct HNode* Heap; /* 堆的类型定义 */
+ typedef struct HNode* Heap; /* 堆的类型定义 */
 struct HNode {
     ElementType* Data; /* 存储元素的数组 */
     int Size;          /* 堆中当前元素个数 */
@@ -69,13 +69,13 @@ ElementType DeleteMax(MaxHeap H)
         else  /* 下滤X */
             H->Data[Parent] = H->Data[Child];
     }
-    H->Data[Parent] = X;
+    H->Data[Parent] = X; //就是循环结束前的child
 
     return MaxItem;
 }
 
 /*----------- 建造最大堆 -----------*/
-void PercDown(MaxHeap H, int p)
+void PercDown(MaxHeap H, int p)   //第一次传应该是完全二叉树最后一个节点的父节点 H->size/2
 { /* 下滤：将H中以H->Data[p]为根的子堆调整为最大堆 */
     int Parent, Child;
     ElementType X;
@@ -94,7 +94,7 @@ void PercDown(MaxHeap H, int p)
 
 void BuildHeap(MaxHeap H)
 { /* 调整H->Data[]中的元素，使满足最大堆的有序性  */
-  /* 这里假设所有H->Size个元素已经存在H->Data[]中 */
+  /* 这里假设所有H->Size个元素已经存在H->Data[]中 */  //就是数组已经有了完全二叉树的性质
 
     int i;
 
