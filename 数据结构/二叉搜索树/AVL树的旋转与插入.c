@@ -33,6 +33,8 @@ AVLTree SingleRightRotation(AVLTree A)
     B->Left = A;
     A->Height = Max(GetHeight(A->Left), GetHeight(A->Right)) + 1;
     B->Height = Max(A->Height, GetHeight(B->Right)) + 1;
+    
+    return B; 
 }
 
 AVLTree DoubleLeftRightRotation(AVLTree A)
