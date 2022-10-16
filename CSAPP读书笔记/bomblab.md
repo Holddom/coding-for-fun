@@ -20,3 +20,5 @@ https://edu.csdn.net/skill/gml/gml-1c31834f07b04bcc9c5dff5baaa6680c?category=636
 
 我需要花费几天的时间来学习这些前缀知识
 
+今天浅略地看了一下Linux的命令行操作
+
