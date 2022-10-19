@@ -26,3 +26,7 @@ https://edu.csdn.net/skill/gml/gml-1c31834f07b04bcc9c5dff5baaa6680c?category=636
 
 然后开始学习GDB调试
 
+今天又学习了一点点Linux
+
+估计周末才能正式学习GDB了
+
