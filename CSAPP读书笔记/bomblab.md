@@ -30,3 +30,11 @@ https://edu.csdn.net/skill/gml/gml-1c31834f07b04bcc9c5dff5baaa6680c?category=636
 
 估计周末才能正式学习GDB了
 
+26号 已经初步学完了简单的操作GDB
+
+并且 通过看别人的视频 （比看readme快多了） 已经了解了bomb如何去完成的
+
+今天算是这个lab的正式开始吧
+
+摸鱼了两个星期，期间看了看Linux终端的命令行 GDB的用法
+
