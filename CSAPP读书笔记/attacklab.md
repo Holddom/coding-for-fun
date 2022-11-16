@@ -14,3 +14,9 @@
 
 照葫芦画瓢的去做仍是出现一种 You caused a segmentation fault! 的错误
 
+
+
+11.16 今天在线查了很多所谓segmentation fault! 的博客 没查出个所以然来
+
+然后用WSL2原模原样的跑是没有产生这个问题的
+
