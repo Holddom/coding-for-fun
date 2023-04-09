@@ -584,3 +584,144 @@ MAP(INSTR_LIST, FILL_EXEC_TABLE)
 
 
 明天梳理一下源码 开始敲代码 看一下一生一芯
+
+一生一芯的代码选讲是2022年的pa 代码与2021的不同
+
+但也搞懂了makefile中加GCC -E选项
+
+
+
+## 请整理一条指令在NEMU中的执行过程.
+
+在
+
+`cpu_exec(uint64_t n)`
+
+先会调用 `fetch_decode_exec_updatepc(&s);`
+
+进入取值 译码 执行 更新pc 的总函数
+
+接着会调用 
+
+`fetch_decode(s, cpu.pc);` 进行取指和译码
+
+先更新下条pc可能会执行的地址 s->snpc = pc;
+
+## 取指
+
+然后调用具体 isa 的取指译码函数` int isa_fetch_decode(Decode *s)`
+
+`isa_fetch_decode()`还会返回一个编号`idx`, 用于对`g_exec_table`这一数组进行索引.
+
+`g_exec_table`是一个函数指针的数组, 数组中的每个元素都会指向一个用于模拟指令执行的函数, 我们把这样的函数称为"执行辅助函数"(execution helper function). 通过`idx`索引这个数组, 可以找到与一条指令相匹配的执行辅助函数, 并把它记录到`s->EHelper`中.
+
+`isa_fetch_decode()` 
+
+调用： `s->isa.instr.val = instr_fetch(&s->snpc, 4);` 
+
+会从内存中读取指令（作为返回值 返回 留着查表用） 然后更新传入的pc
+
+## 译码
+
+指令记录到`s->isa.instr.val`中
+
+然后在 `isa_fetch_decode()`查表：
+
+调用：` int idx = table_main(s);`
+
+这个`idx` 就是含函数的返回值 用于执行辅助
+
+会用各种宏和
+
+译码辅助函数
+
+译码操作数辅助函数
+
+来辅助译码
+
+表格辅助函数`table_lui()`做的事情很简单, 它直接返回一个标识`lui`指令的唯一ID. 
+
+这个ID会作为译码结果的返回值, 在`fetch_decode()`中索引`g_exec_table`数组.
+
+事实上, NEMU把译码时的如下情况都看作是查表过程:
+
+- 在`isa_fetch_decode()`中查主表(main decode table)
+- 在译码过程中分别匹配指令中的每一个域(如上文介绍的`table_load()`
+- 译码出最终的指令时认为是一种特殊的查表操作, 直接返回标识该指令的唯一ID
+
+如果所有模式匹配规则都无法成功匹配, 代码将会返回一个标识非法指令的ID.
+
+## 执行
+
+译码过程结束之后, 接下来会返回到`fetch_decode()`中, 并通过返回的ID来从`g_exec_table`数组中选择相应的执行辅助函数(execution helper function), 然后记录到`s->EHelper`中.
+
+然后在`fetch_decode_exec_updatepc`调用
+
+最后在`fetch_decode_exec_updatepc`更新动态pc
+
+
+
+## 执行辅助函数
+
+统一通过宏`def_EHelper`(在`nemu/include/cpu/exec.h`中定义)来定义:
+
+执行辅助函数通过RTL指令来描述指令真正的执行功能
+
+每个执行辅助函数都需要有一个标识该指令的ID以及一个表格辅助函数与之相对应, 这一点是通过一系列宏定义来实现的. 在`nemu/src/isa/$ISA/include/isa-all-instr.h`中定义用于表示指令列表的宏`INSTR_LIST`, 它定义了NEMU支持的所有指令. 然后代码通过一种类似函数式编程的方式来定义如下相关的内容:
+
+## 更新pc
+
+更新PC的操作非常简单, 只需要把`s->dnpc`赋值给`cpu.pc`即可. 我们之前提到了`snpc`和`dnpc`。
+
+
+
+## TODO
+
+我们只需要维护`nemu/src/isa/$ISA/include/isa-all-instr.h`中的指令列表, 就可以正确维护执行辅助函数和译码之间的关系了.
+
+实现RTL伪指令 在`nemu/include/rtl/pseudo.h` ISA无关的RTL伪指令
+
+对于RISC v  no isa-dependent rtl instructions
+
+### 实现新指令
+
+1. 在`nemu/src/isa/$ISA/instr/decode.c`中添加正确的模式匹配规则
+2. 用RTL实现正确的执行辅助函数, 需要注意使用RTL伪指令时要遵守上文提到的小型调用约定
+3. 在`nemu/src/isa/$ISA/include/isa-all-instr.h`中把指令添加到`INSTR_LIST`中
+4. 必要时在`nemu/src/isa/$ISA/include/isa-exec.h`中添加相应的头文件
+
+
+
+编译dummy 程序
+
+```bash
+make ARCH=riscv32-nemu ALL=dummy run
+```
+
+缺少指令自然是运行不了的
+
+
+
+查询反汇编：
+
+~~~apl
+80000000 <_start>:
+80000000:	00000413          	li	s0,0
+80000004:	00009117          	auipc	sp,0x9
+80000008:	ffc10113          	addi	sp,sp,-4 # 80009000 <_end>
+8000000c:	00c000ef          	jal	ra,80000018 <_trm_init>
+
+80000010 <main>:
+80000010:	00000513          	li	a0,0
+80000014:	00008067          	ret
+
+80000018 <_trm_init>:
+80000018:	80000537          	lui	a0,0x80000
+8000001c:	ff010113          	addi	sp,sp,-16
+80000020:	03850513          	addi	a0,a0,56 # 80000038 <_end+0xffff7038>
+80000024:	00112623          	sw	ra,12(sp)
+80000028:	fe9ff0ef          	jal	ra,80000010 <main>
+8000002c:	00050513          	mv	a0,a0
+80000030:	0000006b          	0x6b
+80000034:	0000006f          	j	80000034 <_trm_init+0x1c>
+~~~
