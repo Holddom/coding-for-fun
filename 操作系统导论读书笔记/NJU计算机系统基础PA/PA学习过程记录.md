@@ -725,3 +725,25 @@ make ARCH=riscv32-nemu ALL=dummy run
 80000030:	0000006b          	0x6b
 80000034:	0000006f          	j	80000034 <_trm_init+0x1c>
 ~~~
+
+4.10 今天在捣鼓zsh时 发现了
+
+Makefile:3: *** NEMU_HOME= is not a NEMU repo.  Stop.
+
+这个错误 ：[(24条消息) UbuntuWSL操作PA的BUG记录——AM_HOME环境变量的设定_wsl设置环境变量_IQIUM的博客-CSDN博客](https://blog.csdn.net/IQIUM/article/details/116208601)
+
+这篇文章是一个关于如何在Linux上设置环境变量的教程。如果你想要设置环境变量NEMU_HOME，可以在终端中输入以下命令：
+
+```
+export NEMU_HOME=/home/lin/ics2021/nemu
+```
+
+如果你想要永久保存这个环境变量，可以在.bashrc文件中添加以下行：
+
+```
+export NEMU_HOME=/home/lin/ics2021/nemu
+```
+
+然后使用命令`source ~/.bashrc`让环境变量生效。
+
+暂时不用zsh了 明天看一下指令选讲
