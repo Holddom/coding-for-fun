@@ -754,5 +754,5 @@ export NEMU_HOME=/home/lin/ics2021/nemu
 
 花了半天时间也没有解决 明天继续
 
-
+4.16 摆到了现在
 
