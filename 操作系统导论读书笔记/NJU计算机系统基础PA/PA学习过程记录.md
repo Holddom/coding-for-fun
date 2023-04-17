@@ -756,3 +756,6 @@ export NEMU_HOME=/home/lin/ics2021/nemu
 
 4.16 摆到了现在
 
+4.17 这几天课太多了 没办法进行
+
+4.18 开始重新弄一下vsc的配置 pa py
