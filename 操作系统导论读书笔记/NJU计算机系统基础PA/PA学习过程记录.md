@@ -665,6 +665,8 @@ MAP(INSTR_LIST, FILL_EXEC_TABLE)
 
 统一通过宏`def_EHelper`(在`nemu/include/cpu/exec.h`中定义)来定义:
 
+/home/xuange/ics2021/nemu/src/isa/riscv32/instr/compute.h 中实现
+
 执行辅助函数通过RTL指令来描述指令真正的执行功能
 
 每个执行辅助函数都需要有一个标识该指令的ID以及一个表格辅助函数与之相对应, 这一点是通过一系列宏定义来实现的. 在`nemu/src/isa/$ISA/include/isa-all-instr.h`中定义用于表示指令列表的宏`INSTR_LIST`, 它定义了NEMU支持的所有指令. 然后代码通过一种类似函数式编程的方式来定义如下相关的内容:
@@ -762,3 +764,54 @@ export NEMU_HOME=/home/lin/ics2021/nemu
 
 4.19 小摆
 
+4.21 再战PA
+
+再次缕清了实现新指令的思路
+
+首先在 def_THelper(main) 抄指令
+
+然后在 对应的def_DHelper实现 其中要用到def_DopHelper
+
+然后在 compute.h 中实现def_EHelper
+
+最后在 
+
+nemu/src/isa/riscv32/include/isa-all-instr.h 维护指令列表
+
+
+
+###### 第二条指令 0x00009117  100100010***0**011001***
+
+
+
+在实现跳转指令时要在 riscv32_ISADecodeInfo 中实现 一个 j类型指令的结构体
+
+都实现完后
+
+会出现
+
+[src/monitor/monitor.c:20 welcome] Exercise: Please remove me in the source code and compile NEMU again.
+[src/cpu/cpu-exec.c:124 cpu_exec] nemu: HIT GOOD TRAP at pc = 0x80000030
+[src/cpu/cpu-exec.c:57 statistic] host time spent = 95 us
+[src/cpu/cpu-exec.c:58 statistic] total guest instructions = 13
+[src/cpu/cpu-exec.c:59 statistic] simulation frequency = 136842 instr/s
+ dummy
+[         dummy] PASS!
+
+
+
+然后开始下一部分
+
+## 程序, 运行时环境与AM
+
+### 运行时环境
+
+![image-20230421213844023](C:\Users\86184\AppData\Roaming\Typora\typora-user-images\image-20230421213844023.png)
+
+总任务
+
+#####  阅读Makefile
+
+`abstract-machine`项目的Makefile设计得非常巧妙, 你需要把它们看成一种代码来RTFSC, 从而理解它们是如何工作的. 这样一来, 你就知道怎么编写有一定质量的Makefile了; 同时, 如果哪天Makefile出现了非预期的行为, 你就可以尝试对Makefile进行调试了. 当然, 这少不了[RTFM](http://www.gnu.org/software/make/manual/make.pdf).
+
+明天看一下am代码导读
