@@ -815,3 +815,5 @@ nemu/src/isa/riscv32/include/isa-all-instr.h 维护指令列表
 `abstract-machine`项目的Makefile设计得非常巧妙, 你需要把它们看成一种代码来RTFSC, 从而理解它们是如何工作的. 这样一来, 你就知道怎么编写有一定质量的Makefile了; 同时, 如果哪天Makefile出现了非预期的行为, 你就可以尝试对Makefile进行调试了. 当然, 这少不了[RTFM](http://www.gnu.org/software/make/manual/make.pdf).
 
 明天看一下am代码导读
+
+4.22 看了am的简介  还剩下半个小时的代码导读 明天看
