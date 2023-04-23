@@ -817,3 +817,79 @@ nemu/src/isa/riscv32/include/isa-all-instr.h 维护指令列表
 明天看一下am代码导读
 
 4.22 看了am的简介  还剩下半个小时的代码导读 明天看
+
+4.23 先入手makefile
+
+程序的起始地址是在链接脚本指定的 具体的值在abstract-machine/scripts/platform/nemu.mk 中可修改
+
+这是运行时环境所约定的
+
+**运行程序**： make ARCH=$ISA-nemu(或native) ALL=xxx run 
+
+在$ISA-nemu中运行 会在build下生成一个 .txt 文件 可查看反汇编结果
+
+链接脚本 .ld 还定义了栈顶 栈指针 和堆区
+
+说白了 就是 linker.ld 定义的各种的段 （abstract-machine/scripts/linker.ld）用来交叉编译
+
+abstract-machine/am/src/platform/nemu中 实现了TRM的运行时环境
+
+klib - 机器无关的运行时环境 可以在这里面写库函数
+
+
+
+对于 AM_HOME的 mk
+
+1. Basic Setup and Checks
+
+2. General Compilation Targets
+
+3. General Compilation Flags
+
+4. Arch-Specific Configurations
+
+5. Compilation Rules
+
+6. Miscellaneous
+
+
+
+编译生成一个可以在NEMU的运行时环境上运行的程序的过程大致如下:
+
+- gcc将`$ISA-nemu`的AM实现源文件编译成目标文件, 然后通过ar将这些目标文件作为一个库, 打包成一个归档文件`abstract-machine/am/build/am-$ISA-nemu.a`
+- gcc把应用程序源文件(如`am-kernels/tests/cpu-tests/tests/dummy.c`)编译成目标文件
+- 通过gcc和ar把程序依赖的运行库(如`abstract-machine/klib/`)也编译并打包成归档文件
+- 根据Makefile文件`abstract-machine/scripts/$ISA-nemu.mk`中的指示, 让ld根据链接脚本`abstract-machine/scripts/linker.ld`, 将上述目标文件和归档文件链接成可执行文件
+
+
+
+我们对编译得到的可执行文件的行为进行简单的梳理:
+
+1. 第一条指令从`abstract-machine/am/src/$ISA/nemu/start.S`开始, 设置好栈顶之后就跳转到`abstract-machine/am/src/platform/nemu/trm.c`的`_trm_init()`函数处执行.
+2. 在`_trm_init()`中调用`main()`函数执行程序的主体功能, `main()`函数还带一个参数, 目前我们暂时不会用到, 后面我们再介绍它.
+3. 从`main()`函数返回后, 调用`halt()`结束运行.
+
+
+
+### 运行更多的程序
+
+未测试代码永远是错的, 你需要足够多的测试用例来测试你的NEMU. 我们在`am-kernels/tests/cpu-tests/`目录下准备了一些简单的测试用例. 在该目录下执行
+
+```bash
+make ARCH=$ISA-nemu ALL=xxx run
+```
+
+其中`xxx`为测试用例的名称(不包含`.c`后缀).
+
+上述`make run`的命令最终会启动NEMU, 并运行相应的客户程序. 如果你需要使用GDB来调试NEMU运行客户程序的情况, 可以执行以下命令:
+
+```bash
+make ARCH=$ISA-nemu ALL=xxx gdb
+```
+
+
+
+### 又一个任务
+
+实现更多指令 然后测试用例中调用的一些函数也没有实现 需要在abstract-machine/klib/src 中实现
+
