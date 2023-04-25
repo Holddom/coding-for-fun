@@ -893,3 +893,20 @@ make ARCH=$ISA-nemu ALL=xxx gdb
 
 实现更多指令 然后测试用例中调用的一些函数也没有实现 需要在abstract-machine/klib/src 中实现
 
+
+
+### 一个实现新指令的思路
+
+```bash
+make ARCH=$ISA-nemu ALL=xxx run
+```
+
+先把一个个测试用例跑了 缺啥加啥
+
+别忘了在nemu/src/isa/riscv32/include/isa-def.h
+
+共用体中加对于指令类型的结构体
+
+4.25 按字母顺序 已经做到mul-longlong.c了
+
+这是个搬砖的活儿
