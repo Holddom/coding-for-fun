@@ -910,3 +910,5 @@ make ARCH=$ISA-nemu ALL=xxx run
 4.25 按字母顺序 已经做到mul-longlong.c了
 
 这是个搬砖的活儿
+
+4.26 至此实现了除string`和`hello-str 外 .c文件所需要的指令 明天继续
