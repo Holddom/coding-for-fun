@@ -932,3 +932,75 @@ make ARCH=$ISA-nemu ALL=xxx run
 ####  指令执行的踪迹 - itrace
 
 5.3 最近没空 很忙
+
+5.5 继续
+
+[src/monitor/monitor.c:13 welcome] Trace: ON
+[src/monitor/monitor.c:14 welcome] If trace is enabled, a log file will be generated to record the trace. This may lead to a large log file. If it is not necessary, you can disable it in menuconfig
+[src/monitor/monitor.c:17 welcome] Build time: 22:35:33, Apr 25 2023
+
+在每次用nemu运行程序时
+
+都会出现上面的与trace有关的log
+
+最后聚焦在  src/cpu/cpu-exec.c 中的 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) 
+
+函数上
+
+我在实现监视点的时候 将宏定义有关的代码写在这里
+
+这个函数里面其实也有 itrace有关的代码 
+
+它决定了 是否在结构体 Decode 中多定义一个字符数组 log
+
+如果在menu里面开启了 itrace 则会打印这个数组 要找到这个数组是什么时候被赋值的
+
+再者就是讲到在做指令有关的代码的时候
+
+src/cpu/cpu-exec.c的void fetch_decode(Decode *s, vaddr_t pc)  函数中有上次没阅读的有关trace的代码
+
+~~~c
+#ifdef CONFIG_ITRACE   //剩下与trace相关的代码
+  char *p = s->logbuf;
+  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);//写入pc值
+  int ilen = s->snpc - s->pc;
+  int i;
+  uint8_t *instr = (uint8_t *)&s->isa.instr.val;
+  for (i = 0; i < ilen; i ++) {
+    p += snprintf(p, 4, " %02x", instr[i]); //写入解码指令
+  }
+  int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
+  int space_len = ilen_max - ilen;
+  if (space_len < 0) space_len = 0;
+  space_len = space_len * 3 + 1;
+  memset(p, ' ', space_len);
+  p += space_len;
+  //反汇编函数   应该是在这里打印的 cpp的部分
+  void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+  disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
+      MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.instr.val, ilen);
+#endif
+~~~
+
+客户程序执行的指令都会被记录到build/nemu-log.txt
+
+不是nemu中的
+
+而是/ics2021/am-kernels/tests/cpu-tests/build/nemu-log.txt
+
+初始的状态是记录了每一条指令
+
+只想输出客户程序出错的时候最近的若干条指令
+
+要维护一个数据结构环形缓冲区(ring buffer)
+
+ 具体地, 在每执行一条指令的时候, 就把这条指令的信息写入到环形缓冲区中; 如果缓冲区满了, 就会覆盖旧的内容. 客户程序出错的时候, 就把环形缓冲区中的指令打印出来, 供调试进行参考
+
+所谓环形缓冲区 其实就是循环队列
+
+[环形缓冲区（Ring Buffer）使用说明 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/545000051)
+
+
+
+
+
