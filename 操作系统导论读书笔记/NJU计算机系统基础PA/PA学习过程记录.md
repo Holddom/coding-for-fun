@@ -884,7 +884,7 @@ make ARCH=$ISA-nemu ALL=xxx run
 上述`make run`的命令最终会启动NEMU, 并运行相应的客户程序. 如果你需要使用GDB来调试NEMU运行客户程序的情况, 可以执行以下命令:
 
 ```bash
-make ARCH=$ISA-nemu ALL=xxx gdb
+make ARCH=$riscv32-nemu ALL=xxx gdb
 ```
 
 
@@ -898,7 +898,7 @@ make ARCH=$ISA-nemu ALL=xxx gdb
 ### 一个实现新指令的思路
 
 ```bash
-make ARCH=$ISA-nemu ALL=xxx run
+make ARCH=$riscv32-nemu ALL=xxx run
 ```
 
 先把一个个测试用例跑了 缺啥加啥
@@ -1002,5 +1002,59 @@ src/cpu/cpu-exec.c的void fetch_decode(Decode *s, vaddr_t pc)  函数中有上�
 
 5.6 今天小摆 早八毁一天 
 
+5.7 开始做itrace 实现环形缓冲区 要明白在哪里加代码
+
+可以在对应isa的cpu结构体上定义一个存指令的数组 和下标
+
+~~~c
+  // 环形缓冲区  nemu/src/isa/riscv32/include/isa-def.h
+  IFDEF(CONFIG_ITRACE, char iringbuf[16][128]);
+  IFDEF(CONFIG_ITRACE, long long index);
+~~~
+
+存指令的部分放在fetch_decode(Decode *s, vaddr_t pc) 
+
+最下方
+
+~~~c
+if (ITRACE_COND) {
+    char *p = cpu.iringbuf[cpu.index % 16];
+    sprintf(p, "%s\n", s->logbuf);
+    ++cpu.index;
+  }
+~~~
 
 
+
+再定义一个打印函数：
+
+~~~c
+void print_iringbuf() {
+#ifdef CONFIG_ITRACE
+  printf("\n");
+  if (cpu.index <= 16) {
+    for (int i = 0; i < cpu.index; ++i) {
+      printf("%s", cpu.iringbuf[i]);
+    }
+  }
+  else {
+    for (int i = 0; i < 16; ++i) {
+      int index = (i + cpu.index) % 16;
+      printf("%s", cpu.iringbuf[index]);
+    }
+  }
+#endif
+}
+~~~
+
+打印函数的调用放在
+
+assert_fail_msg() 里 
+
+当客户程序出错时便会调用了 指的是过了编译后
+
+等会写个越界的例子试试
+
+弄完后要弄 mtrace和ftrace
+
+要涉及到 menuconfig
