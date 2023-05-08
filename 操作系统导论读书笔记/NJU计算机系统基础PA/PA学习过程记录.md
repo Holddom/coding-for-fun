@@ -884,7 +884,7 @@ make ARCH=$ISA-nemu ALL=xxx run
 上述`make run`的命令最终会启动NEMU, 并运行相应的客户程序. 如果你需要使用GDB来调试NEMU运行客户程序的情况, 可以执行以下命令:
 
 ```bash
-make ARCH=$riscv32-nemu ALL=xxx gdb
+make ARCH=riscv32-nemu ALL=xxx gdb
 ```
 
 
@@ -1058,3 +1058,25 @@ assert_fail_msg() 里
 弄完后要弄 mtrace和ftrace
 
 要涉及到 menuconfig
+
+
+
+5.8 实现mtrace
+
+只需要在`paddr_read()`和`paddr_write()`中进行记录即可. 你可以自行定义mtrace输出的格式.
+
+首先要 添加一个关于mtrace的menuconfig
+
+#### 函数调用的踪迹 - ftrace
+
+设计一个工具ftrace, 用来追踪程序执行过程中的函数调用和返回, 我们不就可以知道程序大概是如何工作的了吗?
+
+这其实并不困难, 因为itrace已经能够追踪程序执行的所有指令了, 要实现ftrace, 我们只需要关心函数调用和返回相关的指令就可以了. 我们可以在函数调用指令中记录目标地址, 表示将要调用某个函数; 然后在函数返回指令中记录当前PC, 表示将要从PC所在的函数返回. 我们很容易在相关指令的执行辅助函数中添加代码来实现这些功能. 但目标地址和PC值仍然缺少程序语义, 如果我们能把它们翻译成函数名, 就更容易理解了!
+
+
+
+需要看.elf 文件 有关代码段地址
+
+符号表
+
+明天再看吧
